@@ -1,0 +1,12 @@
+[Desktop Entry]
+Name=Keep Awake
+Comment=Block system sleep while letting the screen blank
+Type=Application
+Exec=cosmic-applet-awake
+Terminal=false
+Categories=COSMIC;
+Keywords=COSMIC;Iced;caffeine;sleep;suspend;
+Icon=io.github.bear.CosmicAppletAwake-on-symbolic
+NoDisplay=true
+X-CosmicApplet=true
+X-OverflowPriority=10

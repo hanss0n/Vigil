@@ -1,0 +1,17 @@
+[package]
+name = "cosmic-applet-awake"
+version = "0.1.0"
+edition = "2024"
+license = "MIT"
+description = "COSMIC panel applet that blocks system sleep (but not screen blanking)"
+
+[dependencies]
+zbus = { version = "5", default-features = false, features = ["blocking-api", "async-io"] }
+
+[dependencies.libcosmic]
+git = "https://github.com/pop-os/libcosmic"
+default-features = false
+features = ["applet", "applet-token", "tokio", "wayland"]
+
+[profile.release]
+lto = "thin"

@@ -4,7 +4,6 @@ mod state;
 use std::os::fd::OwnedFd;
 
 use cosmic::app::{Core, Task};
-use cosmic::widget;
 use cosmic::{Application, Element};
 
 const ICON_ON: &str = "io.github.bear.CosmicAppletAwake-on-symbolic";
@@ -18,7 +17,6 @@ struct Awake {
     core: Core,
     /// Some while sleep is blocked. Dropping the fd releases the block.
     lock: Option<OwnedFd>,
-    error: Option<String>,
 }
 
 #[derive(Debug, Clone)]
@@ -33,13 +31,9 @@ impl Awake {
         }
         if on {
             match inhibit::acquire() {
-                Ok(fd) => {
-                    self.lock = Some(fd);
-                    self.error = None;
-                }
+                Ok(fd) => self.lock = Some(fd),
                 Err(e) => {
                     eprintln!("cosmic-applet-awake: inhibit failed: {e}");
-                    self.error = Some(e.to_string());
                     return;
                 }
             }
@@ -68,7 +62,6 @@ impl Application for Awake {
         let mut app = Awake {
             core,
             lock: None,
-            error: None,
         };
         if state::load() {
             app.set(true);
@@ -84,18 +77,11 @@ impl Application for Awake {
     }
 
     fn view(&self) -> Element<'_, Message> {
-        let on = self.lock.is_some();
-        let tip = match (&self.error, on) {
-            (Some(e), _) => format!("Keep Awake: failed ({e})"),
-            (None, true) => "Keep Awake: on (sleep blocked, screen may still blank)".into(),
-            (None, false) => "Keep Awake: off".into(),
-        };
-        let button = self
-            .core
+        let icon = if self.lock.is_some() { ICON_ON } else { ICON_OFF };
+        self.core
             .applet
-            .icon_button(if on { ICON_ON } else { ICON_OFF })
-            .on_press(Message::Toggle);
-        widget::tooltip(button, widget::text(tip), widget::tooltip::Position::Bottom)
+            .icon_button(icon)
+            .on_press(Message::Toggle)
             .into()
     }
 

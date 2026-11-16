@@ -1,3 +1,4 @@
+mod idle;
 mod inhibit;
 mod state;
 
@@ -37,8 +38,15 @@ impl Awake {
                     return;
                 }
             }
+            // The lock alone doesn't stop COSMIC's own idle suspend; see idle.rs.
+            if let Err(e) = idle::pause() {
+                eprintln!("cosmic-applet-awake: failed to pause idle suspend: {e}");
+            }
         } else {
             self.lock = None;
+            if let Err(e) = idle::resume() {
+                eprintln!("cosmic-applet-awake: failed to restore idle suspend: {e}");
+            }
         }
         state::save(on);
     }
@@ -65,6 +73,10 @@ impl Application for Awake {
         };
         if state::load() {
             app.set(true);
+        } else if let Err(e) = idle::resume() {
+            // Off at startup (e.g. after a reboot): undo a pause left behind
+            // by a run that ended while on.
+            eprintln!("cosmic-applet-awake: failed to restore idle suspend: {e}");
         }
         (app, Task::none())
     }

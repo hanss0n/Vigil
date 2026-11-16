@@ -1,11 +1,15 @@
 //! Remembers whether the applet was switched on, so it survives reboots,
-//! panel restarts and updates.
+//! logouts, panel restarts and updates.
+//!
+//! Starting in the on state re-applies the idle pause (see idle.rs), so
+//! after a reboot COSMIC's suspend stays off while Keep Awake shows as on.
 
 use std::path::PathBuf;
 
 fn path() -> Option<PathBuf> {
     let base = std::env::var_os("XDG_STATE_HOME")
         .map(PathBuf::from)
+        .filter(|p| p.is_absolute())
         .or_else(|| std::env::var_os("HOME").map(|h| PathBuf::from(h).join(".local/state")))?;
     Some(base.join("cosmic-applet-awake/enabled"))
 }

@@ -2,7 +2,6 @@
 name = "cosmic-applet-awake"
 version = "0.1.0"
 edition = "2024"
-license = "MIT"
 description = "COSMIC panel applet that blocks system sleep (but not screen blanking)"
 
 [dependencies]
